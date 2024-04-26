@@ -1,0 +1,23 @@
+Which minecraft item cures all potion effects?
+Milk Potion_of_Healing Chorus_Fruit
+Milk
+
+Which train goes to 34th Street - Hudson Yards?
+C 1 7
+7
+
+Which train does not go to Atlantic Avenue Barclays Center?
+1 4 N
+1
+
+Which train takes you to CitiField?
+F N 7
+7
+
+Which ingredient do you need to make a Potion of Turtle Master?
+Slime Scute Membrane
+Scute
+
+What is a valid stop on the N train?
+Astoria_Ditmars Dyker_Heights Columbus_Circle
+Astoria_Ditmars

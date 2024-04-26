@@ -372,8 +372,8 @@ void lp()
         // 🚨 Error checking: Make sure we can open the cmdline file
         if (fp == -1)
         {  
-            free(cmdline_path);
             fprintf(stderr, "Error: Cannot open file %s. %s.\n", cmdline_path, strerror(errno));
+            free(cmdline_path);
             continue;    
         }
 
@@ -387,8 +387,8 @@ void lp()
         // 🚨 Error checking for malloc.
         if (process_command == NULL)
         {
-            free(cmdline_path);
             fprintf(stderr, "Error: malloc() failed. %s.\n", strerror(errno));
+            free(cmdline_path);
             continue;
         }
 
@@ -515,14 +515,50 @@ void cd(char** argument_list, int num_arguments)
     {
         // If there is an argument that's not ~, that's the directory we're changing into
         char* dest_dir = argument_list[1];
+        char* original_dir = strdup(dest_dir);      // This is here because we will modify $dest_dir later
+
+        // If the first thing in dest_dir is ~/, that means we need to navigate from the default directory.
+        // ie. ~/../
+        if (strlen(dest_dir) > 1 && dest_dir[0] == '~' && dest_dir[1] == '/')
+        {
+            // Let's change into that.
+            char* default_dir;;
+            if (get_default_dir(&default_dir) == -1)
+            {
+                return;
+            }
+
+            // 🚨 Error checking: Changing directories failed
+            // If we can't go into ~/, we can't go into subsequent local directories either since permissions are recursive
+            if (chdir(default_dir) == -1)
+            {
+                free(default_dir);
+                fprintf(stderr, "Error: Cannot change directory to %s. %s.\n", default_dir, strerror(errno));
+                return;
+            }
+
+            free(default_dir);
+
+            // Now, change dest_dir to remove the '~/'
+            // Remove the first two '~/'
+            char* temp_dir = malloc(strlen(dest_dir) - 2 + 1);
+            strncpy(temp_dir, dest_dir + 2, strlen(dest_dir) - 2 + 1);
+            
+            strcpy(dest_dir, temp_dir);
+            free(temp_dir);
+        }
 
         // 🚨 Error checking: Changing directories failed
         // While we do that, change into the destination dir
         if (chdir(dest_dir) == -1)
         {
-            fprintf(stderr, "Error: Cannot change directory to %s. %s.\n", dest_dir, strerror(errno));
+            fprintf(stderr, "Error: Cannot change directory to %s. %s.\n", original_dir, strerror(errno));
+            free(original_dir);
             return;
         }
+
+        // Garbage Collection
+        free(original_dir);
     }
 }
 
